@@ -1,0 +1,9 @@
+name: compbio-services
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+  - slivka
+  - bartongroup
+dependencies:
+  - slivka-bio

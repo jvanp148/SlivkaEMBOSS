@@ -1,0 +1,383 @@
+# Slivka REST API Test Requests
+## This file contains example HTTP requests for the Slivka REST API running at http://localhost:8000/api, demonstrating usage of EMBOSS tools and ANARCI.
+## To run these requests, open this file in VS Code and install the REST Client extension by Huachao Mao.
+
+### Get API Info
+GET http://localhost:8000/api/openapi.yaml 
+Accept: application/json
+
+### Show slivka version.
+GET http://localhost:8000/api/version
+Accept: application/json
+
+### Show List of all Services.
+GET http://localhost:8000/api/services
+Accept: application/json
+
+#####################################################################################
+#####################################################################################
+### Upload File to the Server
+#### Uploaded files are given identifiers that can be used during job submission without the need to re-upload them. 
+#### Upload the file first if you intent to reuse the same file in multiple jobs.
+POST http://localhost:8000/api/files
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="file"; filename="fam83b-pandda-chains-for-align-test.fa"
+Content-Type: application/fasta
+
+< ./testdata/Bambi_Hs_dna.fasta
+--boundary123--
+
+### Show Uploaded Files
+#### Use job ID from previous upload to retrieve the uploaded file
+GET http://localhost:8000/media/uploads/ahW1Oju873tP76lK
+
+#####################################################################################
+#####################################################################################
+### Run EMBOSS NEEDLE
+#### Retrieve EMBOSS Needle service information
+GET http://localhost:8000/api/services/needle
+
+#### Upload file(s) for Needle alignment, the other uploaded file (see above) will be used as second sequence
+POST http://localhost:8000/api/files
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="file"; filename="sequenceBAMBIRattusNorvegicus.fasta"
+Content-Type: application/fasta
+
+< ./testdata/Bambi_Rn_dna.fasta
+--boundary123--
+
+#### Submit EMBOSS Needle job using uploaded file IDs
+POST /api/services/needle/jobs HTTP/1.1
+Host: localhost:8000
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="asequence"
+
+ahW3dDu873tP76lN
+--boundary123
+Content-Disposition: form-data; name="bsequence"
+
+ahW3JTu873tP76lM
+--boundary123
+Content-Disposition: form-data; name="gapopen"
+
+10.0
+--boundary123
+Content-Disposition: form-data; name="gapextend"
+
+0.5
+--boundary123
+Content-Disposition: form-data; name="brief"
+
+N
+--boundary123
+Content-Disposition: form-data; name="sformat-asequence"
+
+fasta
+--boundary123--
+
+#### Show needle job using previous job IDs, is it COMPLETED?
+GET http://localhost:8000/api/jobs/ahW30zu873tP76lO
+Accept: application/json
+
+#### Retrieve content of previous job
+GET http://localhost:8000/media/jobs/ahW30zu873tP76lO/outfile.txt
+
+#####################################################################################
+#####################################################################################
+### Run EMBOSS INFOSEQ
+#### Retrieve EMBOSS Infoseq service information
+GET http://localhost:8000/api/services/infoseq
+Accept: application/json
+
+#### Submit job using uploaded file ID
+POST /api/services/infoseq/jobs HTTP/1.1
+Host: localhost:8000
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="sequence"
+
+ahW3JTu873tP76lM
+--boundary123
+Content-Disposition: form-data; name="name"
+
+Y
+--boundary123
+Content-Disposition: form-data; name="gi"
+
+Y
+--boundary123
+Content-Disposition: form-data; name="heading"
+
+Y
+--boundary123
+Content-Disposition: form-data; name="sformat-sequence"
+
+fasta
+--boundary123
+Content-Disposition: form-data; name="sreverse-sequence"
+
+Y
+--boundary123
+Content-Disposition: form-data; name="sprotein-sequence"
+
+Y
+--boundary123
+Content-Disposition: form-data; name="columns"
+
+Y
+--boundary123
+Content-Disposition: form-data; name="pgc"
+
+N
+--boundary123
+Content-Disposition: form-data; name="organism"
+
+N
+--boundary123
+Content-Disposition: form-data; name="description"
+
+N
+--boundary123--
+
+#### Show job
+GET http://localhost:8000/api/jobs/ahW40zu873tP76lQ
+Accept: application/json
+
+#### Retrieve content
+GET http://localhost:8000/media/jobs/ahW40zu873tP76lQ/outfile.txt
+
+#####################################################################################
+#####################################################################################
+### Run EMBOSS GETORF
+#### Submit job using path to local file
+POST /api/services/getorf/jobs HTTP/1.1
+Host: localhost:8000
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="sequence"; filename="vhh_multiseq_dna.fasta"
+Content-Type: text/fasta
+
+< ./testdata/vhh_multiseq_dna.fasta
+--boundary123
+Content-Disposition: form-data; name="sformat-sequence"
+
+fasta
+--boundary123
+Content-Disposition: form-data; name="find"
+
+1
+--boundary123
+Content-Disposition: form-data; name="minsize"
+
+150
+--boundary123
+Content-Disposition: form-data; name="reverse"
+
+N
+--boundary123--
+
+#### Show job
+GET http://localhost:8000/api/jobs/ahW6gju873tP76lU
+
+#### Retrieve content
+GET http://localhost:8000/media/jobs/ahW6gju873tP76lU/outseq.orf
+
+#####################################################################################
+#####################################################################################
+### Run ANARCI
+#### Submit job using getorf output
+POST /api/services/anarci/jobs HTTP/1.1
+Host: localhost:8000
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="sequence"
+
+ahW6gju873tP76lU/outseq.orf
+--boundary123
+Content-Disposition: form-data; name="scheme"
+
+kabat
+--boundary123
+Content-Disposition: form-data; name="csv"
+
+Y
+--boundary123--
+
+#### Retrieve content
+GET http://localhost:8000/media/jobs/ahW7Czu873tP76lV/outfile_H.csv
+
+#####################################################################################
+#####################################################################################
+### Run EMBOSS EMMA
+#### Show service information
+GET http://localhost:8000/api/services/emma
+
+#### Submit job using getorf output
+POST /api/services/emma/jobs HTTP/1.1
+Host: localhost:8000
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="sequence"
+
+ahW6gju873tP76lU/outseq.orf
+--boundary123
+Content-Disposition: form-data; name="matrix"
+
+p
+--boundary123
+Content-Disposition: form-data; name="slowalign"
+
+Y
+--boundary123--
+
+#### Retrieve content
+GET http://localhost:8000/media/jobs/ahW7gzu873tP76lW/outseq.aln
+
+#####################################################################################
+#####################################################################################
+### Run EMBOSS SHOWALIGN
+#### Submit showalign job using previous emma output
+POST /api/services/showalign/jobs HTTP/1.1
+Host: localhost:8000
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="sequence"
+
+ahW7gzu873tP76lW/outseq.aln
+--boundary123
+Content-Disposition: form-data; name="bottom"
+
+Y
+--boundary123--
+
+#### Retrieve content
+GET http://localhost:8000/media/jobs/ahW74Tu873tP76lX/outfile.txt
+
+#####################################################################################
+#####################################################################################
+### TESTING OUT SOME OTHER TOOLS
+#### SEQRET
+POST /api/services/seqret/jobs HTTP/1.1
+Host: localhost:8000
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="sequence"; filename="Bambi_Hs_protein.fasta"
+Content-Type: text/plain
+
+< ./testdata/Bambi_Hs_protein.fasta
+--boundary123
+Content-Disposition: form-data; name="sformat-sequence"
+
+embl
+--boundary123
+Content-Disposition: form-data; name="osformat-outseq"
+
+fasta
+--boundary123--
+
+###########################################
+#### REVSEQ
+POST /api/services/revseq/jobs HTTP/1.1
+Host: localhost:8000
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="sequence"
+
+ae9DVSl5E5z44hk6/outseq.txt
+--boundary123
+Content-Disposition: form-data; name="sprotein-sequence"
+
+N
+--boundary123
+Content-Disposition: form-data; name="complement"
+
+Y
+--boundary123--
+
+###########################################
+#### TRANSEQ
+GET http://localhost:8000/api/services/transeq
+
+####
+POST /api/services/transeq/jobs HTTP/1.1
+Host: localhost:8000
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="sequence"
+
+ae9DVSl5E5z44hk6/outseq.txt
+--boundary123
+Content-Disposition: form-data; name="sprotein-sequence"
+
+N
+--boundary123
+Content-Disposition: form-data; name="frame"
+
+6
+--boundary123--
+
+###########################################
+#### FUZZPRO
+POST /api/services/fuzzpro/jobs HTTP/1.1
+Host: localhost:8000
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="sequence"; filename="Bambi_Hs_protein.fasta"
+Content-Type: text/plain
+
+< ./testdata/Bambi_Hs_protein.fasta
+--boundary123
+Content-Disposition: form-data; name="sprotein-sequence"
+
+Y
+--boundary123
+Content-Disposition: form-data; name="sformat-sequence"
+
+fasta
+--boundary123
+Content-Disposition: form-data; name="pattern"
+
+[ALT](1,4)A
+--boundary123--
+
+####
+GET http://localhost:8000/media/jobs/ahW9JTu873tP76la/outfile.txt
+
+###########################################
+#### EXTRACTSEQ
+POST /api/services/extractseq/jobs HTTP/1.1
+Host: localhost:8000
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="sequence"
+
+ae9DVSl5E5z44hk6/outseq.txt
+--boundary123
+Content-Disposition: form-data; name="sprotein-sequence"
+
+N
+--boundary123
+Content-Disposition: form-data; name="regions"
+
+"10-20 30-45 221-231" 
+--boundary123
+Content-Disposition: form-data; name="separate"
+
+Y
+--boundary123--

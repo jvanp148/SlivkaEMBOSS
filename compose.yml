@@ -1,0 +1,29 @@
+name: slivka-bio
+
+services:
+  slivka-emboss:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: slivka-emboss:1.0
+    container_name: slivka-emboss
+    volumes:
+      - ./services:/opt/conda/envs/compbio-services/var/slivka-bio/services
+      - media:/app/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongo
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/slivka
+
+  mongo:
+    image: mongo:8.2.9
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+
+volumes:
+  media:
+  mongo_data:
