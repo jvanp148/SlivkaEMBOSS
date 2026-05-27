@@ -1,12 +1,12 @@
 # SlivkaEMBOSS
 
-A Docker-based extension of the [slivka-bio-docker](https://github.com/bartongroup/slivka-bio-docker) REST API by the Barton Group, bundling over **200 EMBOSS tools** with full Slivka YAML service configurations.
+A Docker-based extension of the [slivka-bio-docker](https://github.com/bartongroup/slivka-bio-docker) REST API by the Barton Group, bundling over **200 EMBOSS tools** and **ANARCI** with full Slivka YAML service configurations.
 
 ## Overview
 
 [Slivka](https://github.com/bartongroup/slivka) is a REST API framework for exposing bioinformatics tools as web services. This project extends the official `slivka-bio` setup with:
 
-- **200+ EMBOSS tools** installed inside the Slivka server container
+- **200+ EMBOSS tools** and **ANARCI** installed inside the Slivka server container
 - Slivka YAML service configuration files for each tool (tracked with Git LFS)
 - A custom `environment.yml` for the conda environment (`compbio-services`)
 - Test sequences in `testdata/` and HTTP request examples in `test.http`
@@ -122,7 +122,12 @@ Builds from `continuumio/miniconda3` and:
 
 Defines two services (`slivka-emboss` and `mongo`) and two named volumes (`media` and `mongo_data`). MongoDB is available inside the compose network at `mongodb://mongo:27017/slivka`.
 
+### Services (`services/`)
+
+The service configuration YAML files can be found inside the `services/` folder. To create these YAMLs, a CLI parser application has been developed to convert SOAPLab XML files to Slivka YAMLs, via a canonical model. This parser application can be found on the [cli2slivka](https://github.com/jvanp148/cli2slivka) GitHub repository.
+
 ## Credits
 
-- [Barton Group](https://github.com/bartongroup) — original [slivka-bio-docker](https://github.com/bartongroup/slivka-bio-docker) and Slivka framework
-- [EMBOSS](https://emboss.sourceforge.net/) — European Molecular Biology Open Software Suite
+- [Barton Group](https://github.com/bartongroup) - original [slivka-bio-docker](https://github.com/bartongroup/slivka-bio-docker) and Slivka framework
+- [EMBOSS](https://emboss.sourceforge.net/) - European Molecular Biology Open Software Suite
+- [ANARCI](https://github.com/oxpig/ANARCI) - Antigen receptor Numbering And Receptor ClassificatIon
