@@ -1,6 +1,6 @@
 # SlivkaEMBOSS
 
-A Docker-based extension of the [slivka-bio-docker](https://github.com/bartongroup/slivka-bio-docker) REST API by the Barton Group, bundling over **200 EMBOSS tools** and **ANARCI** with full Slivka YAML service configurations.
+A Docker-based extension of the [slivka-bio-docker](https://github.com/bartongroup/slivka-bio-docker) REST API by the Barton Group, bundling over **200 EMBOSS tools** (and **ANARCI**) with full Slivka YAML service configurations.
 
 ## Overview
 
@@ -47,18 +47,15 @@ This will:
 
 On the first run, the image build may take several minutes as conda installs the environment and EMBOSS packages.
 
+NOTE:
+If you would like to use the Slivka EMBOSS server together with the [Prefect Server](https://github.com/jvanp148/Prefect_MinIO_Slivka) or [Streamlit applications](https://github.com/jvanp148/Streamlit_Prefect_Slivka) running in docker containers, you will have to add an external network to the docker compose file (now placed in comments). Creating such a network can be done with this command: `docker network create name-custom-network`.
+
 ### 3. Access the API
 
-Once running, the API is available at:
+Once running, the API ReDoc is available at:
 
 ```text
 http://localhost:8000/api
-```
-
-Full API documentation (ReDoc) is available at:
-
-```text
-http://localhost:8000/api/redoc
 ```
 
 ## Project Structure
@@ -79,7 +76,7 @@ http://localhost:8000/api/redoc
 
 ### Using `testdata/`
 
-The `testdata/` directory contains sample sequences you can use as inputs when submitting jobs to the API.
+The `testdata/` directory contains sample sequences you can use as inputs when submitting jobs to the API. This folder is also mounted as a volume inside the Slivka server container, making it possible to use this data as inputs for tools, when being inside the container.
 
 ### Using `test.http`
 
@@ -100,7 +97,7 @@ To use it:
 | `services/` volume | Mounted from the host; contains all YAML tool definitions |
 | `media` volume | Stores job input/output files |
 
-The `services/` directory is mounted as a volume so tool configurations can be updated without rebuilding the image.
+The `services/` directory is mounted as a volume so tool configurations can be updated without rebuilding the image. `testdata/` is also mounted as a volume so that the data in this folder is accessible inside the container to test out tools.
 
 ## Configuration
 
@@ -114,7 +111,7 @@ Builds from `continuumio/miniconda3` and:
 
 1. Installs `supervisord` and Java (required by some tools)
 2. Creates the `compbio-services` conda environment
-3. Installs `emboss` and `anarci` into the environment
+3. Installs `emboss`, `anarci` and `fasta3` into the environment
 4. Copies `settings.yml` and `supervisord.conf` into place
 5. Exposes port `8000`
 
