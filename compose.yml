@@ -9,6 +9,7 @@ services:
     container_name: slivka-emboss
     volumes:
       - ./services:/opt/conda/envs/compbio-services/var/slivka-bio/services
+      - ./testdata:/opt/conda/envs/compbio-services/var/slivka-bio/testdata
       - media:/app/media
     ports:
       - "8000:8000"
@@ -16,6 +17,8 @@ services:
       - mongo
     environment:
       - MONGODB_URI=mongodb://mongo:27017/slivka
+    #networks:
+    #  - custom-network
 
   mongo:
     image: mongo:8.2.9
@@ -23,7 +26,14 @@ services:
       - mongo_data:/data/db
     ports:
       - "27017:27017"
+    #networks:
+    #  - custom-network
 
 volumes:
   media:
   mongo_data:
+
+### Adding external network for connection with other docker containers
+#networks:
+#  custom-network:
+#    external: true

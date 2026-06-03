@@ -16,6 +16,7 @@ RUN conda env create -f /tmp/environment.yml
 
 RUN conda install -n compbio-services bioconda::emboss -y
 RUN conda install -n compbio-services bioconda::anarci -y
+RUN conda install -n compbio-services bioconda::fasta3 -y
 
 # Copy Slivka config
 COPY ./settings.yml /opt/conda/envs/compbio-services/var/slivka-bio/
